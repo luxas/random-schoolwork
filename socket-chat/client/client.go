@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	socketchat "github.com/luxas/socket-chat"
+	socketchat "github.com/luxas/random-schoolwork/socket-chat"
 )
 
 var nameFlag = flag.String("name", "", "Enter your name")
