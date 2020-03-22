@@ -7,7 +7,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/luxas/socketchat"
+	"github.com/luxas/socket-chat"
 )
 
 func main() {

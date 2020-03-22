@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxas/socketchat"
+	socketchat "github.com/luxas/socket-chat"
 )
 
 var nameFlag = flag.String("name", "", "Enter your name")
@@ -182,7 +182,8 @@ func (c *Client) Disconnect() {
 }
 
 func (c *Client) StartStreaming(w io.Writer) {
-	logger := log.New(w, fmt.Sprintf("client-%s ", c.name), 0)
+	logger := log.New(w, fmt.Sprintf("client-%s ", c.name), log.LstdFlags)
+
 	go func() {
 		for {
 			msg, err := c.conn.Receive()
