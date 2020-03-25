@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	EnableTLS             = true
 	DefaultServerProtocol = "tcp"
 	DefaultServerAddress  = "localhost:6443"
 

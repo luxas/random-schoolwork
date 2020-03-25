@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +12,8 @@ import (
 	socketchat "github.com/luxas/random-schoolwork/socket-chat"
 )
 
+var secure = flag.Bool("secure", true, "Whether to enable TLSv1.3 or not")
+
 func main() {
 	if err := run(); err != nil {
 		log.Fatal(err)
@@ -18,6 +21,7 @@ func main() {
 }
 
 func run() error {
+	flag.Parse()
 	log.Println("Launching server...")
 	s := NewServer(socketchat.DefaultServerProtocol, socketchat.DefaultServerAddress)
 	return s.Serve()
@@ -57,6 +61,7 @@ func (s *Server) SecureListener() (net.Listener, error) {
 
 	config := &tls.Config{
 		Certificates: []tls.Certificate{cer},
+		MinVersion:   tls.VersionTLS13,
 	}
 
 	return tls.Listen(s.lnNetwork, s.lnAddress, config)
@@ -69,7 +74,7 @@ func (s *Server) InsecureListener() (net.Listener, error) {
 func (s *Server) Serve() error {
 	var ln net.Listener
 	var err error
-	if socketchat.EnableTLS {
+	if *secure {
 		ln, err = s.SecureListener()
 	} else {
 		ln, err = s.InsecureListener()

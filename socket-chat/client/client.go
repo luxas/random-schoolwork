@@ -17,6 +17,7 @@ import (
 )
 
 var nameFlag = flag.String("name", "", "Enter your name")
+var secure = flag.Bool("secure", true, "Whether to enable TLSv1.3 or not")
 
 type cliFunc func(c *Client, args []string) error
 type cliHandler struct {
@@ -164,7 +165,7 @@ func NewClient(name string) *Client {
 func (c *Client) Connect(network, address string) error {
 	var conn net.Conn
 	var err error
-	if socketchat.EnableTLS {
+	if *secure {
 		b, err := ioutil.ReadFile("ca.crt")
 		if err != nil {
 			return err
@@ -174,7 +175,8 @@ func (c *Client) Connect(network, address string) error {
 			return fmt.Errorf("couldn't add ca cert to cert pool")
 		}
 		conn, err = tls.Dial(network, address, &tls.Config{
-			RootCAs: certpool,
+			RootCAs:    certpool,
+			MinVersion: tls.VersionTLS13,
 		})
 	} else {
 		conn, err = net.Dial(network, address)
