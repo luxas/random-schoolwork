@@ -2,9 +2,12 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -48,7 +51,7 @@ func run() error {
 
 	c := NewClient(name)
 
-	if err := c.Connect("unix", socketchat.DefaultServerAddress); err != nil {
+	if err := c.Connect(socketchat.DefaultServerProtocol, socketchat.DefaultServerAddress); err != nil {
 		return err
 	}
 	defer c.Disconnect()
@@ -159,9 +162,28 @@ func NewClient(name string) *Client {
 }
 
 func (c *Client) Connect(network, address string) error {
-	conn, err := net.Dial(network, address)
+	var conn net.Conn
+	var err error
+	if socketchat.EnableTLS {
+		b, err := ioutil.ReadFile("ca.crt")
+		if err != nil {
+			return err
+		}
+		certpool := x509.NewCertPool()
+		if ok := certpool.AppendCertsFromPEM(b); !ok {
+			return fmt.Errorf("couldn't add ca cert to cert pool")
+		}
+		conn, err = tls.Dial(network, address, &tls.Config{
+			RootCAs: certpool,
+		})
+	} else {
+		conn, err = net.Dial(network, address)
+	}
 	if err != nil {
 		return err
+	}
+	if conn == nil {
+		return fmt.Errorf("couldn't trust the server for the given root CA")
 	}
 	c.conn = socketchat.NewConnection(conn)
 

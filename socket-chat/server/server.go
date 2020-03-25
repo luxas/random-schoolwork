@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
@@ -18,7 +19,7 @@ func main() {
 
 func run() error {
 	log.Println("Launching server...")
-	s := NewServer("unix", socketchat.DefaultServerAddress)
+	s := NewServer(socketchat.DefaultServerProtocol, socketchat.DefaultServerAddress)
 	return s.Serve()
 }
 
@@ -44,8 +45,35 @@ func NewServer(network, address string) *Server {
 	}
 }
 
+func (s *Server) SecureListener() (net.Listener, error) {
+	if err := CreateServerCerts(); err != nil {
+		return nil, err
+	}
+
+	cer, err := tls.LoadX509KeyPair("server.crt", "server.key")
+	if err != nil {
+		return nil, err
+	}
+
+	config := &tls.Config{
+		Certificates: []tls.Certificate{cer},
+	}
+
+	return tls.Listen(s.lnNetwork, s.lnAddress, config)
+}
+
+func (s *Server) InsecureListener() (net.Listener, error) {
+	return net.Listen(s.lnNetwork, s.lnAddress)
+}
+
 func (s *Server) Serve() error {
-	ln, err := net.Listen(s.lnNetwork, s.lnAddress)
+	var ln net.Listener
+	var err error
+	if socketchat.EnableTLS {
+		ln, err = s.SecureListener()
+	} else {
+		ln, err = s.InsecureListener()
+	}
 	if err != nil {
 		return err
 	}

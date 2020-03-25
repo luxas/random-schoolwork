@@ -9,7 +9,9 @@ import (
 )
 
 const (
-	DefaultServerAddress = "/tmp/server.sock"
+	EnableTLS             = true
+	DefaultServerProtocol = "tcp"
+	DefaultServerAddress  = "localhost:6443"
 
 	MaxNameByteSize = 32
 	MaxDataByteSize = 255
