@@ -18,6 +18,7 @@ import (
 
 var nameFlag = flag.String("name", "", "Enter your name")
 var secure = flag.Bool("secure", true, "Whether to enable TLSv1.3 or not")
+var serverAddress = flag.String("server", socketchat.DefaultServerAddress, "What server address and port to connect to")
 
 type cliFunc func(c *Client, args []string) error
 type cliHandler struct {
@@ -52,7 +53,7 @@ func run() error {
 
 	c := NewClient(name)
 
-	if err := c.Connect(socketchat.DefaultServerProtocol, socketchat.DefaultServerAddress); err != nil {
+	if err := c.Connect(socketchat.DefaultServerProtocol, *serverAddress); err != nil {
 		return err
 	}
 	defer c.Disconnect()

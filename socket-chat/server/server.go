@@ -13,6 +13,7 @@ import (
 )
 
 var secure = flag.Bool("secure", true, "Whether to enable TLSv1.3 or not")
+var address = flag.String("address", socketchat.DefaultServerAddress, "What address and port to listen to")
 
 func main() {
 	if err := run(); err != nil {
@@ -23,7 +24,7 @@ func main() {
 func run() error {
 	flag.Parse()
 	log.Println("Launching server...")
-	s := NewServer(socketchat.DefaultServerProtocol, socketchat.DefaultServerAddress)
+	s := NewServer(socketchat.DefaultServerProtocol, *address)
 	return s.Serve()
 }
 
